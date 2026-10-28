@@ -1,0 +1,17 @@
+
+{
+  "name": "la-nata-que-te-mata",
+  "version": "1.0.0",
+  "description": "Proyecto escolar con Node.js y MySQL",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "mysql2": "^3.15.3"
+  }
+}
