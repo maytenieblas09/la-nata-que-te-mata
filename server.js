@@ -14,6 +14,16 @@ const PORT = 3000;
 app.set('trust proxy', 1);
 app.use(express.json({ limit: '10kb' }));
 
+app.use(cors({
+  origin: 'https://maytenieblas09.github.io',
+  credentials: true,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type',
+    'ngrok-skip-browser-warning'
+  ]
+}));
+
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
