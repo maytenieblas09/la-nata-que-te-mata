@@ -1958,69 +1958,165 @@
 
 
 <script>
-/* Login conectado a PHP/MySQL. El diseño original de la página no se modifica. */
+
+/* Login conectado a Node.js y MySQL */
 (function () {
+  // IMPORTANTE: coloca aquí tu dirección HTTPS real de ngrok.
+  const API_BASE = 'https://TU-DIRECCION.ngrok-free.app';
+
   let modo = 'login';
-  const capa = () => document.getElementById('acceso-inicial-login');
-  const form = () => document.getElementById('formulario-acceso-login');
+
+  const capa = () =>
+    document.getElementById('acceso-inicial-login');
+
+  const form = () =>
+    document.getElementById('formulario-acceso-login');
+
   const mensaje = (texto, correcto = false) => {
     const el = document.getElementById('mensaje-acceso-login');
-    if (el) { el.textContent = texto; el.style.color = correcto ? '#3d7654' : '#8b2d20'; }
+    if (el) {
+      el.textContent = texto;
+      el.style.color = correcto ? '#3d7654' : '#8b2d20';
+    }
   };
+
   function mostrarPagina() {
     const el = capa();
-    if (el) { el.hidden = true; el.style.display = 'none'; el.setAttribute('aria-hidden', 'true'); }
+    if (el) {
+      el.hidden = true;
+      el.style.display = 'none';
+      el.setAttribute('aria-hidden', 'true');
+    }
     document.body.style.overflow = '';
   }
+
   function mostrarLogin() {
     const el = capa();
-    if (el) { el.hidden = false; el.style.display = 'flex'; el.removeAttribute('aria-hidden'); }
+    if (el) {
+      el.hidden = false;
+      el.style.display = 'flex';
+      el.removeAttribute('aria-hidden');
+    }
     document.body.style.overflow = 'hidden';
   }
+
   function cambiarModo(nuevoModo) {
     modo = nuevoModo;
     const registro = modo === 'registro';
-    document.getElementById('titulo-acceso-login').textContent = registro ? 'Crear cuenta' : 'Iniciar sesión';
-    document.getElementById('texto-ayuda-login').textContent = registro ? 'Registra tu correo y crea tu acceso.' : 'Ingresa con tu correo y contraseña.';
-    document.getElementById('boton-enviar-login').textContent = registro ? 'Registrarme' : 'Ingresar';
-    document.getElementById('contrasena-acceso-login').autocomplete = registro ? 'new-password' : 'current-password';
-    document.getElementById('modo-iniciar-login').style.background = registro ? '#542d1c' : '#c99542';
-    document.getElementById('modo-iniciar-login').style.color = registro ? '#fff' : '#321a11';
-    document.getElementById('modo-registrar-login').style.background = registro ? '#c99542' : '#542d1c';
-    document.getElementById('modo-registrar-login').style.color = registro ? '#321a11' : '#fff';
+
+    document.getElementById('titulo-acceso-login').textContent =
+      registro ? 'Crear cuenta' : 'Iniciar sesión';
+
+    document.getElementById('texto-ayuda-login').textContent =
+      registro ? 'Registra tu correo y crea tu acceso.' :
+      'Ingresa tus datos para acceder a nuestra página.';
+
+    document.getElementById('boton-enviar-login').textContent =
+      registro ? 'Registrarme' : 'Ingresar';
+
+    document.getElementById('contrasena-acceso-login').autocomplete =
+      registro ? 'new-password' : 'current-password';
+
+    document.getElementById('modo-iniciar-login').style.background =
+      registro ? '#542d1c' : '#c99542';
+
+    document.getElementById('modo-iniciar-login').style.color =
+      registro ? '#fff' : '#321a11';
+
+    document.getElementById('modo-registrar-login').style.background =
+      registro ? '#c99542' : '#542d1c';
+
+    document.getElementById('modo-registrar-login').style.color =
+      registro ? '#321a11' : '#fff';
+
     mensaje('');
   }
+
   async function comprobarSesion() {
     try {
-      const r = await fetch('auth.php?action=status', { credentials: 'same-origin' });
+      const r = await fetch(
+        `${API_BASE}/auth.php?action=status`,
+        {
+          credentials: 'include',
+          headers: { 'ngrok-skip-browser-warning': 'true' }
+        }
+      );
+
       const d = await r.json();
-      if (d.ok && d.autenticado) mostrarPagina(); else mostrarLogin();
-    } catch (e) { mostrarLogin(); mensaje('No se pudo conectar. Abre la página desde XAMPP (http://localhost/...), no como archivo.'); }
+
+      if (d.ok && d.autenticado) {
+        mostrarPagina();
+      } else {
+        mostrarLogin();
+      }
+    } catch (e) {
+      mostrarLogin();
+      mensaje('No se pudo conectar. Revisa Node.js, ngrok y CORS.');
+    }
   }
+
   form().addEventListener('submit', async function (e) {
     e.preventDefault();
-    const correo = document.getElementById('correo-acceso-login').value.trim();
-    const contrasena = document.getElementById('contrasena-acceso-login').value;
-    if (!correo || !contrasena) { mensaje('Escribe tu correo y contraseña.'); return; }
+
+    const correo =
+      document.getElementById('correo-acceso-login').value.trim();
+
+    const contrasena =
+      document.getElementById('contrasena-acceso-login').value;
+
+    if (!correo || !contrasena) {
+      mensaje('Escribe tu correo y contraseña.');
+      return;
+    }
+
     const boton = document.getElementById('boton-enviar-login');
     boton.disabled = true;
+
     try {
-      const r = await fetch('auth.php?action=' + modo, {
-        method: 'POST', credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ correo, contrasena })
-      });
+      const r = await fetch(
+        `${API_BASE}/auth.php?action=${modo}`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': 'true'
+          },
+          body: JSON.stringify({ correo, contrasena })
+        }
+      );
+
       const d = await r.json();
-      if (!r.ok || !d.ok) { mensaje(d.mensaje || 'No se pudo completar la operación.'); return; }
-      if (d.autenticado) { mostrarPagina(); }
-      else { cambiarModo('login'); mensaje('Cuenta creada. Ahora puedes iniciar sesión.', true); }
-    } catch (err) { mensaje('No se pudo conectar con el servidor. Revisa que Apache y MySQL estén activos.'); }
-    finally { boton.disabled = false; }
+
+      if (!r.ok || !d.ok) {
+        mensaje(d.mensaje || 'No se pudo completar la operación.');
+        return;
+      }
+
+      if (d.autenticado) {
+        mostrarPagina();
+      } else {
+        cambiarModo('login');
+        mensaje('Cuenta creada. Ahora puedes iniciar sesión.', true);
+      }
+    } catch (err) {
+      mensaje('No se pudo conectar. Revisa la dirección de ngrok y CORS.');
+    } finally {
+      boton.disabled = false;
+    }
   });
-  document.getElementById('modo-iniciar-login').addEventListener('click', () => cambiarModo('login'));
-  document.getElementById('modo-registrar-login').addEventListener('click', () => cambiarModo('registro'));
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', comprobarSesion);
-  else comprobarSesion();
+
+  document.getElementById('modo-iniciar-login')
+    .addEventListener('click', () => cambiarModo('login'));
+
+  document.getElementById('modo-registrar-login')
+    .addEventListener('click', () => cambiarModo('registro'));
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', comprobarSesion);
+  } else {
+    comprobarSesion();
+  }
 })();
 </script>
 
