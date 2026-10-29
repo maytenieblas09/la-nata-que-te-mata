@@ -1,8 +1,6 @@
-
 const express = require('express');
 const mysql = require('mysql2/promise');
 const session = require('express-session');
-const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const cors = require('cors');
 require('dotenv').config();
