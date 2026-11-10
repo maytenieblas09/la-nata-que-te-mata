@@ -12,8 +12,6 @@ const PORT = 3000;
 app.set('trust proxy', 1);
 app.use(express.json({ limit: '10kb' }));
 
-const cors = require('cors');
-
 app.use(cors({
   origin: 'https://maytenieblas09.github.io',
   credentials: true,
@@ -29,11 +27,11 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: 'auto',
-    maxAge: 1000 * 60 * 60 * 4
-  }
+  httpOnly: true,
+  sameSite: 'none',
+  secure: true,
+  maxAge: 1000 * 60 * 60 * 4
+}
 }));
 
 const pool = mysql.createPool({
