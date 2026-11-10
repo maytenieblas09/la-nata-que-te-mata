@@ -12,6 +12,8 @@ const PORT = 3000;
 app.set('trust proxy', 1);
 app.use(express.json({ limit: '10kb' }));
 
+const cors = require('cors');
+
 app.use(cors({
   origin: 'https://maytenieblas09.github.io',
   credentials: true,
